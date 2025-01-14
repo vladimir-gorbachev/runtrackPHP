@@ -13,7 +13,7 @@ $variables = [
     ["type" => "float", "nom" => "floatVar", "valeur" => $floatVar],
 ];
 
-echo "<table border='1' style='border-collapse: collapse; width: 50%;'>";
+echo "<table border='1' style='border-collapse: collapse; width: 50%; height: 200%; font-size: (567);'>";
 echo "<thead>";
 echo "<tr><th>Type</th><th>Nom</th><th>Valeur</th></tr>";
 echo "</thead>";
