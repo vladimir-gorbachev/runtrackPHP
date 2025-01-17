@@ -30,7 +30,7 @@ function bonjour($jour) {
     </style>
     <label for="jour">Est-ce le jour ?</label>
     <input type="checkbox" class=checkbox name="jour" value="1">oui
-    <input type="checkbox" class=checkbox name="nuit" value="">non
+    <input type="checkbox" class=checkbox name="nuit" value="0">non
     <input type="submit" id=submit value="Envoyer">
 </form>
 
