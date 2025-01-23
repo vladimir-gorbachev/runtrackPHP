@@ -1,0 +1,1 @@
+SELECT * FROM salles ORDER BY capacite_etage DESC; 
