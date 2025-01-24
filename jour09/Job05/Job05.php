@@ -1,21 +1,20 @@
 <?php
-// Connexion à la base de données
-$host = 'localhost'; // Hôte
-$username = 'root';  // Nom d'utilisateur
-$password = '';      // Mot de passe
-$database = 'jour08'; // Nom de la base de données
-
-// Création de la connexion
-$conn = new mysqli($host, $username, $password, $database);
-
-// Vérification de la connexion
-if ($conn->connect_error) {
-    die("Erreur de connexion : " . $conn->connect_error);
+// Connexion à la base de données avec PDO
+try {
+    $pdo = new PDO("mysql:host=localhost;dbname=jour08;charset=utf8", 'root', '', [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+} catch (PDOException $e) {
+    die("Erreur : " . $e->getMessage());
 }
 
-// Requête SQL pour récupérer les étudiants de moins de 18 ans
-$sql = "SELECT * FROM étudiants WHERE TIMESTAMPDIFF(YEAR, naissance, CURDATE()) < 18";
-$result = $conn->query($sql);
+// Préparation et exécution de la requête pour récupérer les étudiants de moins de 18 ans
+$stmt = $pdo->prepare("SELECT * FROM étudiants WHERE TIMESTAMPDIFF(YEAR, naissance, CURDATE()) < 18");
+$stmt->execute();
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Récupérer les colonnes (clés) pour l'en-tête
+$columns = array_keys($rows[0] ?? []); // Si des résultats existent, on récupère les clés de la première ligne
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -47,39 +46,23 @@ $result = $conn->query($sql);
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Prénom</th>
-                <th>Nom</th>
-                <th>Date de Naissance</th>
-                <th>Sexe</th>
-                <th>Email</th>
+                <?php foreach ($columns as $column): ?>
+                    <th><?= htmlspecialchars(ucwords($column)) ?></th>
+                <?php endforeach; ?>
             </tr>
         </thead>
         <tbody>
-            <?php
-            // Vérification si des résultats sont disponibles
-            if ($result->num_rows > 0) {
-                // Parcourir et afficher chaque ligne de résultats
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>" . htmlspecialchars($row['ID']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['prénom']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['nom']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['naissance']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['sexe']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                    echo "</tr>";
-                }
-            } else {
-                // Si aucun résultat n'est trouvé
-                echo "<tr><td colspan='6'>Aucun étudiant trouvé</td></tr>";
-            }
-            // Libérer les résultats
-            $result->free();
-            // Fermer la connexion
-            $conn->close();
-            ?>
-            
+        <?php if ($rows): ?>
+            <?php foreach ($rows as $row): ?>
+                <tr>
+                    <?php foreach ($row as $value): ?>
+                        <td><?= htmlspecialchars($value) ?></td>
+                    <?php endforeach; ?>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr><td colspan="<?= count($columns) ?>">Aucun étudiant trouvé</td></tr>
+        <?php endif; ?>
         </tbody>
     </table>
 </body>

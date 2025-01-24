@@ -1,21 +1,16 @@
 <?php
-// Connexion à la base de données
-$host = 'localhost'; // Hôte
-$username = 'root';  // Nom d'utilisateur
-$password = '';      // Mot de passe
-$database = 'jour08'; // Nom de la base de données
-
-// Création de la connexion
-$conn = new mysqli($host, $username, $password, $database);
-
-// Vérification de la connexion
-if ($conn->connect_error) {
-    die("Erreur de connexion : " . $conn->connect_error);
+// Connexion à la base de données avec PDO
+try {
+    $pdo = new PDO("mysql:host=localhost;dbname=jour08;charset=utf8", 'root', '', [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+} catch (PDOException $e) {
+    die("Erreur : " . $e->getMessage());
 }
 
-// Requête SQL pour calculer la superficie totale des étages
-$sql = "SELECT SUM(superficie) AS superficie_totale FROM étage";
-$result = $conn->query($sql);
+// Exécution de la requête pour calculer la superficie totale
+$stmt = $pdo->query("SELECT SUM(superficie) AS superficie_totale FROM étage");
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -51,21 +46,9 @@ $result = $conn->query($sql);
             </tr>
         </thead>
         <tbody>
-            <?php
-            // Vérification si des résultats sont disponibles
-            if ($result->num_rows > 0) {
-                // Récupérer et afficher la superficie totale
-                $row = $result->fetch_assoc();
-                echo "<tr><td>" . htmlspecialchars($row['superficie_totale']) . " m²</td></tr>";
-            } else {
-                // Si aucun résultat n'est trouvé
-                echo "<tr><td>Aucune donnée disponible</td></tr>";
-            }
-            // Libérer les résultats
-            $result->free();
-            // Fermer la connexion
-            $conn->close();
-            ?>
+            <tr>
+                <td><?= htmlspecialchars($row['superficie_totale'] ?? 'Aucune donnée disponible') ?> m²</td>
+            </tr>
         </tbody>
     </table>
 </body>

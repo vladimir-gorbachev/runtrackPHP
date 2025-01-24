@@ -8,9 +8,12 @@ try {
     die("Erreur : " . $e->getMessage());
 }
 
-// Récupération des données
-$rows = $pdo->query("SELECT * FROM étudiants")->fetchAll(PDO::FETCH_ASSOC);
+
+$sql = $pdo->prepare("SELECT * FROM étudiants"); // Prépare la requête SQL
+$sql->execute(); // Exécute la requête préparée
+$rows = $sql->fetchAll(PDO::FETCH_ASSOC); // Récupère les résultats sous forme de tableau associatif
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>

@@ -1,21 +1,17 @@
 <?php
-// Connexion à la base de données
-$host = 'localhost'; // Hôte
-$username = 'root';  // Nom d'utilisateur
-$password = '';      // Mot de passe
-$database = 'jour08'; // Nom de la base de données
-
-// Création de la connexion
-$conn = new mysqli($host, $username, $password, $database);
-
-// Vérification de la connexion
-if ($conn->connect_error) {
-    die("Erreur de connexion : " . $conn->connect_error);
+// Connexion à la base de données avec PDO
+try {
+    $pdo = new PDO("mysql:host=localhost;dbname=jour08;charset=utf8", 'root', '', [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+} catch (PDOException $e) {
+    die("Erreur : " . $e->getMessage());
 }
 
-// Requête SQL pour récupérer les étudiantes
-$sql = "SELECT prénom, nom, naissance FROM étudiants WHERE sexe = 'Femme'";
-$result = $conn->query($sql);
+// Préparation et exécution de la requête pour récupérer les étudiantes
+$stmt = $pdo->prepare("SELECT prénom, nom, naissance FROM étudiants WHERE sexe = 'Femme'");
+$stmt->execute();
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -54,24 +50,13 @@ $result = $conn->query($sql);
         </thead>
         <tbody>
             <?php
-            // Vérification si des résultats sont disponibles
-            if ($result->num_rows > 0) {
-                // Parcourir et afficher chaque ligne de résultats
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>" . htmlspecialchars($row['prénom']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['nom']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['naissance']) . "</td>";
-                    echo "</tr>";
+            if ($rows) {
+                foreach ($rows as $row) {
+                    echo "<tr><td>" . htmlspecialchars($row['prénom']) . "</td><td>" . htmlspecialchars($row['nom']) . "</td><td>" . htmlspecialchars($row['naissance']) . "</td></tr>";
                 }
             } else {
-                // Si aucun résultat n'est trouvé
                 echo "<tr><td colspan='3'>Aucune étudiante trouvée</td></tr>";
             }
-            // Libérer les résultats
-            $result->free();
-            // Fermer la connexion
-            $conn->close();
             ?>
         </tbody>
     </table>
